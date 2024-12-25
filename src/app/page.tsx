@@ -1,101 +1,156 @@
-import Image from "next/image";
+"use client"; //using client because hooks are client side renderd
+import { useRef, useState } from "react"; //this will import useState to the page
+import { nanoid } from "nanoid";
+import { Bounce, ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-export default function Home() {
+export default function HomePage() {
+  //we use useState to store our tasks in it's array in other words it will store the task in the array and it will update our UI by showing the task
+  const [tasks, setTasks] = useState([]);
+
+  //We are using useRef to access and manipulate the input field
+  const inputReference = useRef(null);
+
+  const handleAddTasks = () => {
+    //This gets the value in input field as text / string
+    let inputValue = inputReference?.current?.value as string;
+    /*This if statement notify the user to enter a task add task or 
+    enter key is pressed on empty input field and the return statement 
+    prevents the state to update when input field is empty */
+    if (!inputValue) {
+      toast.warn("Please enter a Task!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      });
+      return;
+    }
+
+    //This updates the list in useState and its unique id to store is generated from the package nanoid
+    setTasks([{ title: inputValue, id: nanoid() }, ...tasks]);
+    /*This notify the user when a task is entered*/
+    toast.success("Task added successfully", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+    });
+
+    //This will clear the input field after entering the task
+    if (inputReference.current) {
+      inputReference.current.value = "";
+    }
+  };
+
+  //This function listens the keyboard event of pressing Enter key
+  //and when it is pressed it calls the handleAddTask function from above
+  function onKeyEnter(my_key: React.KeyboardEvent) {
+    if (my_key.key === "Enter") {
+      handleAddTasks();
+    }
+  }
+
+  /* The setter function below runs a filter method on the tasks array 
+   the e in the perameter of deleteTask represents the id of each task
+   the filter method runs a loop and adds every task in the new tasks array
+   and deletes "does not include" the one for which delete button was pressed  */
+  function deleteTask(e: string) {
+    setTasks(tasks.filter((elem) => elem.id !== e));
+    /*This notify the user when a task is deleted*/
+    toast.warn("Task was deleted", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+    });
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div>
+      <div className="text-xl text-white pb-4 text-center pt-3 bg-slate-500 h-14    font-bold leading-5 ">
+        Task Manager
+      </div>
+      <div className="m-6 p-10 bg-blue-300 w-96 rounded-xl">
+        <div className="flex gap-3">
+          <input
+            //onkeyDown listens When the ENTER key is pressed and then call the onKeyEnter function
+            onKeyDown={onKeyEnter}
+            //This uses useRef to capture the value user puts in input field
+            ref={inputReference}
+            className="border-2 pl-1 outline-none  rounded"
+          />
+          {/* This buton will add tasks to list */}
+          <button
+            //onClick listens to the mouse event and calls the handleAddTasks function when add task button is clicked
+            onClick={handleAddTasks}
+            className="text-white ml-2 rounded bg-gray-400 px-3"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            Add Tasks
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* This ul is the list of tasks added */}
+        <ul>
+          {/* Below is a terenarry operator and when there 
+          is no task " task.length == 0 " it shows No Taska Available 
+          but when the user enters a task it runs the map method on the
+           tasks array further detail is in the comment in return*/}
+          {tasks.length == 0 ? (
+            <h1>No Task Available</h1>
+          ) : (
+            tasks.map((elem, index) => {
+              return (
+                /* In the div below users tasks are showed it recognizes each 
+                task by the key attribute for the map method and that key is a 
+                unique id generated by nanoid */
+                <div
+                  className="mt-3  bg-gray-200 m rounded-lg py-1 pl-2 justify-between flex items-center  text-[#2b2a2a]"
+                  key={elem.id}
+                >
+                  {/*  The line below helps to show the numbring of each task
+                  simply using the index of the array but because index starts
+                  from 0 we have added 1 in index and the " . " is to make 
+                  a premium experience  */}
+                  {index + 1 + ". "}
+
+                  {/* The line below showcasews the text in the task by using
+                  the title value of the setter function/setTasks function */}
+                  {elem.title}
+
+                  <button
+                    /* The onClick runs a callback function which is calling the 
+                  deleteTask function and elem.id helps the filter method recognize 
+                  the unique id and eleminate them */
+                    onClick={() => {
+                      deleteTask(elem.id);
+                    }}
+                    className="bg-red-400 px-4 mr-2 font-semibold rounded-sm "
+                  >
+                    Delete
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </ul>
+        <ToastContainer />
+      </div>
     </div>
   );
 }
